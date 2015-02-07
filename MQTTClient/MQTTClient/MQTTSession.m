@@ -29,10 +29,11 @@
 #import "MQTTDecoder.h"
 #import "MQTTEncoder.h"
 #import "MQTTMessage.h"
+#import "SRWebSocket.h"
 
 #import <CFNetwork/CFSocketStream.h>
 
-@interface MQTTSession() <MQTTDecoderDelegate, MQTTEncoderDelegate>
+@interface MQTTSession() <MQTTDecoderDelegate, MQTTEncoderDelegate, SRWebSocketDelegate>
 @property (nonatomic, readwrite) MQTTSessionStatus status;
 
 @property (strong, nonatomic) NSTimer *keepAliveTimer;
@@ -54,6 +55,9 @@
 @property (nonatomic) UInt16 synchronSubMid;
 @property (nonatomic) BOOL synchronConnect;
 @property (nonatomic) BOOL synchronDisconnect;
+
+@property (strong, nonatomic) SRWebSocket *websocket;
+@property (nonatomic) BOOL synchronWSConnect;
 
 @end
 
@@ -395,6 +399,7 @@
     if (DEBUGSESS) NSLog(@"%@ connectToHost:%@ port:%d usingSSL:%d]", self, host, (unsigned int)port, usingSSL);
     
     self.selfReference = self;
+    self.synchronWSConnect = TRUE;
     
     if (!host) {
         host = @"localhost";
@@ -402,44 +407,47 @@
     
     self.status = MQTTSessionStatusCreated;
     
-    CFReadStreamRef readStream;
-    CFWriteStreamRef writeStream;
+    self.websocket.delegate = nil;
+    [self.websocket close];
     
-    CFStreamCreatePairWithSocketToHost(NULL, (__bridge CFStringRef)host, port, &readStream, &writeStream);
+    NSString *protocol = (usingSSL) ? @"wss" : @"ws";
+    NSString *portString = (port == 0) ? @"" : [NSString stringWithFormat:@":%d",(unsigned int)port];
+    NSString *path = @"/mqtt";
+    self.websocket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@%@",protocol,host,portString,path]]]];
     
-    CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
-    CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+    self.websocket.delegate = self;
     
-    if (usingSSL) {
-        const void *keys[] = { kCFStreamSSLLevel,
-            kCFStreamSSLPeerName };
-        
-        const void *vals[] = { kCFStreamSocketSecurityLevelNegotiatedSSL,
-            kCFNull };
-        
-        CFDictionaryRef sslSettings = CFDictionaryCreate(kCFAllocatorDefault, keys, vals, 2,
-                                                         &kCFTypeDictionaryKeyCallBacks,
-                                                         &kCFTypeDictionaryValueCallBacks);
-        
-        CFReadStreamSetProperty(readStream, kCFStreamPropertySSLSettings, sslSettings);
-        CFWriteStreamSetProperty(writeStream, kCFStreamPropertySSLSettings, sslSettings);
-        
-        CFRelease(sslSettings);
+    [self.websocket open];
+    
+    //wait for 100 seconds
+    int connectEmergencyBrake = 0;
+    while (self.synchronWSConnect && connectEmergencyBrake < 1000) {
+        if (DEBUGSESS) NSLog(@"%@ waiting for connect", self);
+        [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:.1]];
+        connectEmergencyBrake++;
     }
     
-    self.encoder = [[MQTTEncoder alloc] initWithStream:(__bridge NSOutputStream*)writeStream
-                                               runLoop:self.runLoop
-                                           runLoopMode:self.runLoopMode];
+    self.encoder = [[MQTTEncoder alloc] initWithWebSocket:self.websocket
+                                                  runLoop:self.runLoop
+                                              runLoopMode:self.runLoopMode];
     
-    self.decoder = [[MQTTDecoder alloc] initWithStream:(__bridge NSInputStream*)readStream
-                                               runLoop:self.runLoop
-                                           runLoopMode:self.runLoopMode];
+    self.decoder = [[MQTTDecoder alloc] initWithWebSocket:self.websocket
+                                                  runLoop:self.runLoop
+                                              runLoopMode:self.runLoopMode];
     
     self.encoder.delegate = self;
     self.decoder.delegate = self;
     
     [self.encoder open];
     [self.decoder open];
+    
+    if(connectEmergencyBrake >= 1000 && self.synchronWSConnect){
+        NSDictionary *errorDictionary = @{ NSLocalizedDescriptionKey : @"Connection creation timeout" };
+        
+        NSError *anError = [[NSError alloc] initWithDomain:@"WSConnection"
+                                                      code:1000 userInfo:errorDictionary];
+        [self webSocket:self.websocket didFailWithError:anError];
+    }
 }
 
 - (void)connectToHost:(NSString*)ip port:(UInt32)port {
@@ -1324,6 +1332,31 @@
         self.txMsgId++;
     }
     return self.txMsgId;
+}
+
+- (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message{
+    [self.decoder decodeMessage:message];
+}
+
+- (void)webSocketDidOpen:(SRWebSocket *)webSocket{
+    NSLog(@"connected to websocket");
+    self.synchronWSConnect = FALSE;
+}
+
+- (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error{
+    NSLog(@"Failed to connect : %@",[error debugDescription]);
+    self.synchronWSConnect = FALSE;
+    [self connectionError:error];
+}
+
+- (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean{
+    NSLog(@"ConnectionClosed : %@",reason);
+    self.synchronWSConnect = FALSE;
+    [self error:MQTTSessionEventConnectionClosedByBroker error:nil];
+}
+
+- (void)webSocket:(SRWebSocket *)webSocket didReceivePong:(NSData *)pongPayload{
+    
 }
 
 @end

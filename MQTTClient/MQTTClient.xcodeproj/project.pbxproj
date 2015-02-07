@@ -69,6 +69,9 @@
 		84B1AFF2196D99170056B959 /* MQTTSessionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 84B1AFF0196D99170056B959 /* MQTTSessionManager.h */; };
 		84B1AFF3196D99170056B959 /* MQTTSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 84B1AFF1196D99170056B959 /* MQTTSessionManager.m */; };
 		84B739B31A66F07A00B103F4 /* SwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B739B21A66F07A00B103F4 /* SwiftTests.swift */; };
+		8BF49E1D1A86C0130068C644 /* SRWebSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BF49E1A1A86C0130068C644 /* SRWebSocket.h */; };
+		8BF49E1E1A86C0130068C644 /* SRWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 8BF49E1B1A86C0130068C644 /* SRWebSocket.m */; };
+		8BF49E201A86C6370068C644 /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BF49E1F1A86C6370068C644 /* libicucore.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -173,6 +176,9 @@
 		84B739B11A66F07900B103F4 /* MQTTClientTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MQTTClientTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		84B739B21A66F07A00B103F4 /* SwiftTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftTests.swift; sourceTree = "<group>"; };
 		84E0010118E22C9600C07F23 /* MQTTClientTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MQTTClientTests.h; sourceTree = "<group>"; };
+		8BF49E1A1A86C0130068C644 /* SRWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SRWebSocket.h; sourceTree = "<group>"; };
+		8BF49E1B1A86C0130068C644 /* SRWebSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SRWebSocket.m; sourceTree = "<group>"; };
+		8BF49E1F1A86C6370068C644 /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +209,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8BF49E201A86C6370068C644 /* libicucore.dylib in Frameworks */,
 				840507C5193DCF2E002EBBD2 /* UIKit.framework in Frameworks */,
 				8461913C1883E56800101409 /* XCTest.framework in Frameworks */,
 				846191421883E56800101409 /* libMQTTClient.a in Frameworks */,
@@ -251,6 +258,7 @@
 		846191211883E56800101409 = {
 			isa = PBXGroup;
 			children = (
+				8BF49E181A86C0130068C644 /* SocketRocket */,
 				8461912F1883E56800101409 /* MQTTClient */,
 				846191431883E56800101409 /* MQTTClientTests */,
 				840F3C641A80054D00575235 /* MQTTSDK */,
@@ -274,6 +282,7 @@
 		8461912C1883E56800101409 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8BF49E1F1A86C6370068C644 /* libicucore.dylib */,
 				840507C4193DCF2E002EBBD2 /* UIKit.framework */,
 				840507C2193DCE4B002EBBD2 /* CFNetwork.framework */,
 				8461912D1883E56800101409 /* Foundation.framework */,
@@ -338,6 +347,15 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		8BF49E181A86C0130068C644 /* SocketRocket */ = {
+			isa = PBXGroup;
+			children = (
+				8BF49E1A1A86C0130068C644 /* SRWebSocket.h */,
+				8BF49E1B1A86C0130068C644 /* SRWebSocket.m */,
+			);
+			path = SocketRocket;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -345,6 +363,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8BF49E1D1A86C0130068C644 /* SRWebSocket.h in Headers */,
 				84B1AFF2196D99170056B959 /* MQTTSessionManager.h in Headers */,
 				846191E71883E74D00101409 /* MQTTClient.h in Headers */,
 				846192021883E8FD00101409 /* MQTTEncoder.h in Headers */,
@@ -564,6 +583,7 @@
 				846191EF1883E8B900101409 /* MQTTMessage.m in Sources */,
 				846191EE1883E8B900101409 /* MQTTEncoder.m in Sources */,
 				846191F01883E8B900101409 /* MQTTSession.m in Sources */,
+				8BF49E1E1A86C0130068C644 /* SRWebSocket.m in Sources */,
 				846191ED1883E8B900101409 /* MQTTDecoder.m in Sources */,
 				846191F11883E8B900101409 /* MQTTTxFlow.m in Sources */,
 			);
@@ -760,11 +780,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Developer Hapim (GP3FT4HNF3)";
 				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/MQTTClient.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MQTTClient/MQTTClient-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Users/ckrey/mqttIO-objC/src/MqttSDK/build/MqttSDK.build/Debug-iphoneos/MqttSDK.build/Objects-normal/armv7",
@@ -784,11 +806,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Developer Hapim (GP3FT4HNF3)";
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/MQTTClient.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MQTTClient/MQTTClient-Prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Users/ckrey/mqttIO-objC/src/MqttSDK/build/MqttSDK.build/Debug-iphoneos/MqttSDK.build/Objects-normal/armv7",
@@ -807,6 +831,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Developer Hapim (GP3FT4HNF3)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -819,6 +844,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "MQTTClientTests/MQTTClientTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MQTTClientTests/MQTTClientTests-Bridging-Header.h";
@@ -831,6 +857,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Developer Hapim (GP3FT4HNF3)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -839,6 +866,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MQTTClient/MQTTClient-Prefix.pch";
 				INFOPLIST_FILE = "MQTTClientTests/MQTTClientTests-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MQTTClientTests/MQTTClientTests-Bridging-Header.h";

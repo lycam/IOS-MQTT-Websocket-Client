@@ -27,27 +27,30 @@
 
 @implementation MQTTDecoder
 
-- (id)initWithStream:(NSInputStream *)stream
-             runLoop:(NSRunLoop *)runLoop
-         runLoopMode:(NSString *)mode {
+- (id)initWithWebSocket:(SRWebSocket *)webSocket
+                runLoop:(NSRunLoop*)runLoop
+            runLoopMode:(NSString*)mode {
     self.status = MQTTDecoderStatusInitializing;
-    self.stream = stream;
-    [self.stream setDelegate:self];
     self.runLoop = runLoop;
     self.runLoopMode = mode;
+    self.websocket = webSocket;
     return self;
 }
 
 - (void)open {
-    [self.stream setDelegate:self];
-    [self.stream scheduleInRunLoop:self.runLoop forMode:self.runLoopMode];
-    [self.stream open];
+    if(self.stream!=nil){
+        [self.stream setDelegate:self];
+        [self.stream scheduleInRunLoop:self.runLoop forMode:self.runLoopMode];
+        [self.stream open];
+    }
 }
 
 - (void)close {
-    [self.stream close];
-    [self.stream removeFromRunLoop:self.runLoop forMode:self.runLoopMode];
-    [self.stream setDelegate:nil];
+    if(self.stream!=nil){
+        [self.stream close];
+        [self.stream removeFromRunLoop:self.runLoop forMode:self.runLoopMode];
+        [self.stream setDelegate:nil];
+    }
 }
 
 - (void)stream:(NSStream*)sender handleEvent:(NSStreamEvent)eventCode {
@@ -138,8 +141,8 @@
             }
             break;
         case NSStreamEventEndEncountered:
-            self.status = MQTTDecoderStatusConnectionClosed;
-            [self.delegate decoder:self handleEvent:MQTTDecoderEventConnectionClosed error:nil];
+            //self.status = MQTTDecoderStatusConnectionClosed;
+            //[self.delegate decoder:self handleEvent:MQTTDecoderEventConnectionClosed error:nil];
             break;
         case NSStreamEventErrorOccurred:
         {
@@ -152,6 +155,17 @@
             if (DEBUGDEC) NSLog(@"%@ unhandled event code 0x%02lx", self, (long)eventCode);
             break;
     }
+}
+
+- (void) decodeMessage : (NSData *) data{
+    if(self.stream != nil){
+        [self.stream setDelegate:nil];
+        [self.stream removeFromRunLoop:self.runLoop forMode:self.runLoopMode];
+        [self.stream close];
+        self.stream = nil;
+    }
+    self.stream = [NSInputStream inputStreamWithData:data];
+    [self open];
 }
 
 @end

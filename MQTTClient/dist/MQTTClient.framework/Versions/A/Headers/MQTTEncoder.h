@@ -19,6 +19,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MQTTMessage.h"
+#import "SRWebSocket.h"
 
 
 typedef enum {
@@ -50,10 +51,11 @@ typedef enum {
 @property (strong, nonatomic)    NSMutableData*  buffer;
 @property (nonatomic)    NSInteger       byteIndex;
 @property (weak, nonatomic)    id<MQTTEncoderDelegate>              delegate;
+@property (strong, nonatomic)    SRWebSocket*  websocket;
 
-- (id)initWithStream:(NSOutputStream*)stream
-             runLoop:(NSRunLoop*)runLoop
-         runLoopMode:(NSString*)mode;
+- (id)initWithWebSocket:(SRWebSocket *)webSocket
+                runLoop:(NSRunLoop*)runLoop
+            runLoopMode:(NSString*)mode;
 - (void)open;
 - (void)close;
 - (MQTTEncoderStatus)status;

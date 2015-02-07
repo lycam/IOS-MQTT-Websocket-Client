@@ -19,6 +19,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MQTTMessage.h"
+#import "SRWebSocket.h"
 
 typedef enum {
     MQTTDecoderEventProtocolError,
@@ -55,15 +56,17 @@ typedef enum {
 @property (nonatomic)    UInt32          length;
 @property (nonatomic)    UInt32          lengthMultiplier;
 @property (strong, nonatomic)    NSMutableData*  dataBuffer;
+@property (strong, nonatomic)    SRWebSocket*  websocket;
 
 @property (weak, nonatomic ) id<MQTTDecoderDelegate> delegate;
 
-- (id)initWithStream:(NSInputStream *)stream
-             runLoop:(NSRunLoop *)runLoop
-         runLoopMode:(NSString *)mode;
+- (id)initWithWebSocket:(SRWebSocket *)webSocket
+                runLoop:(NSRunLoop*)runLoop
+            runLoopMode:(NSString*)mode;
 - (void)open;
 - (void)close;
 - (void)stream:(NSStream *)sender handleEvent:(NSStreamEvent)eventCode;
+- (void)decodeMessage:(NSData *)data;
 @end
 
 

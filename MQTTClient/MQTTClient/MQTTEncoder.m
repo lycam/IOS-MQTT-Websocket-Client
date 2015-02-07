@@ -28,14 +28,15 @@
 
 @implementation MQTTEncoder
 
-- (id)initWithStream:(NSOutputStream*)stream
-             runLoop:(NSRunLoop*)runLoop
-         runLoopMode:(NSString*)mode {
+- (id)initWithWebSocket:(SRWebSocket *)webSocket
+                runLoop:(NSRunLoop*)runLoop
+            runLoopMode:(NSString*)mode {
     self.status = MQTTEncoderStatusInitializing;
-    self.stream = stream;
+    self.stream = [[NSOutputStream alloc] initToMemory];
     [self.stream setDelegate:self];
     self.runLoop = runLoop;
     self.runLoopMode = mode;
+    self.websocket = webSocket;
     return self;
 }
 
@@ -147,6 +148,8 @@
     if ([msg data] != NULL) {
         [self.buffer appendData:[msg data]];
     }
+    
+    [self.websocket send:self.buffer];
 
     if (DEBUGENC) NSLog(@"%@ buffer to write (%lu)=%@...", self, (unsigned long)self.buffer.length,
           [self.buffer subdataWithRange:NSMakeRange(0, MIN(16, self.buffer.length))]);
