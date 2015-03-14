@@ -419,9 +419,9 @@
     
     [self.websocket open];
     
-    //wait for 100 seconds
+    //wait for 3 seconds
     int connectEmergencyBrake = 0;
-    while (self.synchronWSConnect && connectEmergencyBrake < 1000) {
+    while (self.synchronWSConnect && connectEmergencyBrake < 30) {
         if (DEBUGSESS) NSLog(@"%@ waiting for connect", self);
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:.1]];
         connectEmergencyBrake++;
@@ -441,7 +441,7 @@
     [self.encoder open];
     [self.decoder open];
     
-    if(connectEmergencyBrake >= 1000 && self.synchronWSConnect){
+    if(connectEmergencyBrake >= 30 && self.synchronWSConnect){
         NSDictionary *errorDictionary = @{ NSLocalizedDescriptionKey : @"Connection creation timeout" };
         
         NSError *anError = [[NSError alloc] initWithDomain:@"WSConnection"
