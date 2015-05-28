@@ -9,6 +9,7 @@ Pod::Spec.new do |s|
 
   s.source_files = "MQTTClient/MQTTClient", "MQTTClient/MQTTClient/**/*.{h,m}", "MQTTClient/SocketRocket", "MQTTClient/SocketRocket/**/*.{h,m}"
   s.requires_arc = true
-
+  s.framework    = 'libicucore.dylib'
+  
   s.ios.deployment_target = "7.0"
 end
