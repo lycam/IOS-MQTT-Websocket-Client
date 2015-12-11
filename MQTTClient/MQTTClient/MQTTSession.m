@@ -7,15 +7,15 @@
 // based on
 //
 // Copyright (c) 2011, 2013, 2lemetry LLC
-// 
+//
 // All rights reserved. This program and the accompanying materials
 // are made available under the terms of the Eclipse Public License v1.0
 // which accompanies this distribution, and is available at
 // http://www.eclipse.org/legal/epl-v10.html
-// 
+//
 // Contributors:
 //    Kyle Roche - initial API and implementation and/or initial documentation
-// 
+//
 
 /**
  Using MQTT in your Objective-C application
@@ -91,37 +91,37 @@
 }
 
 - (MQTTSession *)initWithClientId:(NSString *)clientId
-              userName:(NSString *)userName
-              password:(NSString *)password
-             keepAlive:(UInt16)keepAliveInterval
-          cleanSession:(BOOL)cleanSessionFlag
-                  will:(BOOL)willFlag
-             willTopic:(NSString *)willTopic
-               willMsg:(NSData *)willMsg
-               willQoS:(MQTTQosLevel)willQoS
-        willRetainFlag:(BOOL)willRetainFlag
-         protocolLevel:(UInt8)protocolLevel
-               runLoop:(NSRunLoop *)runLoop
-               forMode:(NSString *)runLoopMode
+                         userName:(NSString *)userName
+                         password:(NSString *)password
+                        keepAlive:(UInt16)keepAliveInterval
+                     cleanSession:(BOOL)cleanSessionFlag
+                             will:(BOOL)willFlag
+                        willTopic:(NSString *)willTopic
+                          willMsg:(NSData *)willMsg
+                          willQoS:(MQTTQosLevel)willQoS
+                   willRetainFlag:(BOOL)willRetainFlag
+                    protocolLevel:(UInt8)protocolLevel
+                          runLoop:(NSRunLoop *)runLoop
+                          forMode:(NSString *)runLoopMode
 {
     self = [super init];
     if (DEBUGSESS) NSLog(@"MQTTClient %s %s", __DATE__, __TIME__);
-
+    
     if (DEBUGSESS) NSLog(@"%@ initWithClientId:%@ userName:%@ password:%@ keepAlive:%d cleanSession:%d will:%d willTopic:%@ willTopic:%@ willQos:%d willRetainFlag:%d protocolLevel:%d runLoop:%@ forMode:%@",
-          self,
-          clientId,
-          userName,
-          password,
-          keepAliveInterval,
-          cleanSessionFlag,
-          willFlag,
-          willTopic,
-          willMsg,
-          willQoS,
-          willRetainFlag,
-          protocolLevel,
-          @"runLoop",
-          runLoopMode);
+                         self,
+                         clientId,
+                         userName,
+                         password,
+                         keepAliveInterval,
+                         cleanSessionFlag,
+                         willFlag,
+                         willTopic,
+                         willMsg,
+                         willQoS,
+                         willRetainFlag,
+                         protocolLevel,
+                         @"runLoop",
+                         runLoopMode);
     
     self.clientId = clientId;
     self.userName = userName;
@@ -136,7 +136,7 @@
     self.protocolLevel = protocolLevel;
     self.runLoop = runLoop;
     self.runLoopMode = runLoopMode;
-   
+    
     self.queue = [NSMutableArray array];
     self.txMsgId = 1;
     self.txFlows = [[NSMutableDictionary alloc] init];
@@ -189,7 +189,7 @@
 - (void)setProtocolLevel:(UInt8)protocolLevel
 {
     //NSAssert(protocolLevel == 3 || protocolLevel == 4, @"allowed protocolLevel values are 3 or 4 only");
-
+    
     _protocolLevel = protocolLevel;
 }
 
@@ -413,7 +413,7 @@
     NSString *protocol = (usingSSL) ? @"wss" : @"ws";
     NSString *portString = (port == 0) ? @"" : [NSString stringWithFormat:@":%d",(unsigned int)port];
     NSString *path = @"/mqtt";
-    self.websocket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@%@",protocol,host,portString,path]]]];
+    self.websocket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@%@",protocol,host,portString,path]]] protocols:@[@"mqtt"]];
     
     self.websocket.delegate = self;
     
@@ -457,14 +457,14 @@
 - (void)connectToHost:(NSString*)ip port:(UInt32)port withConnectionHandler:(void (^)(MQTTSessionEvent event))connHandler messageHandler:(void (^)(NSData* data, NSString* topic))messHandler {
     self.messageHandler = messHandler;
     self.connectionHandler = connHandler;
-
+    
     [self connectToHost:ip port:port usingSSL:NO];
 }
 
 - (void)connectToHost:(NSString*)ip port:(UInt32)port usingSSL:(BOOL)usingSSL withConnectionHandler:(void (^)(MQTTSessionEvent event))connHandler messageHandler:(void (^)(NSData* data, NSString* topic))messHandler {
     self.messageHandler = messHandler;
     self.connectionHandler = connHandler;
-
+    
     [self connectToHost:ip port:port usingSSL:usingSSL];
 }
 
@@ -481,7 +481,7 @@
     }
     
     if (DEBUGSESS) NSLog(@"%@ end connect", self);
-
+    
     return (self.status == MQTTSessionStatusConnected);
 }
 
@@ -491,7 +491,7 @@
     if (DEBUGSESS) NSLog(@"%@ subscribeToTopic:%@ atLevel:%d]", self, topic, qosLevel);
     
     //NSAssert(qosLevel >= 0 && qosLevel <= 2, @"qosLevel must be 0, 1, or 2");
-
+    
     UInt16 mid = [self nextMsgId];
     [self send:[MQTTMessage subscribeMessageWithMessageId:mid
                                                    topics:topic ? @{topic: @(qosLevel)} : @{}]];
@@ -514,7 +514,7 @@
     }
     
     if (DEBUGSESS) NSLog(@"%@ end subscribe", self);
-
+    
     if (self.synchronSubMid == mid) {
         return TRUE;
     } else {
@@ -524,12 +524,12 @@
 
 - (UInt16)subscribeToTopics:(NSDictionary *)topics
 {
-   if (DEBUGSESS) NSLog(@"%@ subscribeToTopics:%@]", self, topics);
-
+    if (DEBUGSESS) NSLog(@"%@ subscribeToTopics:%@]", self, topics);
+    
     //for (NSNumber *qos in [topics allValues]) {
-        //NSAssert([qos intValue] >= 0 && [qos intValue] <= 2, @"qosLevel must be 0, 1, or 2");
+    //NSAssert([qos intValue] >= 0 && [qos intValue] <= 2, @"qosLevel must be 0, 1, or 2");
     //}
-
+    
     UInt16 mid = [self nextMsgId];
     [self send:[MQTTMessage subscribeMessageWithMessageId:mid
                                                    topics:topics]];
@@ -548,7 +548,7 @@
     }
     
     if (DEBUGSESS) NSLog(@"%@ end subscribe", self);
-
+    
     if (self.synchronSubMid == mid) {
         return TRUE;
     } else {
@@ -577,7 +577,7 @@
     }
     
     if (DEBUGSESS) NSLog(@"%@ end unsubscribe", self);
-
+    
     if (self.synchronUnsubMid == mid) {
         return TRUE;
     } else {
@@ -590,7 +590,7 @@
     if (DEBUGSESS) NSLog(@"%@ unsubscribeTopics:%@", self, theTopics);
     UInt16 mid = [self nextMsgId];
     [self send:[MQTTMessage unsubscribeMessageWithMessageId:mid
-                                                      topics:theTopics]];
+                                                     topics:theTopics]];
     return mid;
 }
 
@@ -606,7 +606,7 @@
     }
     
     if (DEBUGSESS) NSLog(@"%@ end unsubscribe", self);
-
+    
     if (self.synchronUnsubMid == mid) {
         return TRUE;
     } else {
@@ -620,11 +620,11 @@
                   qos:(MQTTQosLevel)qos
 {
     if (DEBUGSESS) NSLog(@"%@ publishData:%@... onTopic:%@ retain:%d qos:%ld",
-          self,
-          [data subdataWithRange:NSMakeRange(0, MIN(16, data.length))],
-          topic,
-          retainFlag,
-          (long)qos);
+                         self,
+                         [data subdataWithRange:NSMakeRange(0, MIN(16, data.length))],
+                         topic,
+                         retainFlag,
+                         (long)qos);
     
     if (!data) {
         data = [[NSData alloc] init];
@@ -657,14 +657,14 @@
 }
 
 - (BOOL)publishAndWaitData:(NSData*)data
-                     onTopic:(NSString*)topic
-                      retain:(BOOL)retainFlag
-                         qos:(MQTTQosLevel)qos
+                   onTopic:(NSString*)topic
+                    retain:(BOOL)retainFlag
+                       qos:(MQTTQosLevel)qos
 {
     if (qos != MQTTQoSLevelAtMostOnce) {
         self.synchronPub = TRUE;
     }
-
+    
     UInt16 mid = [self publishData:data onTopic:topic retain:retainFlag qos:qos];
     if (qos == MQTTQoSLevelAtMostOnce) {
         return TRUE;
@@ -677,7 +677,7 @@
         }
         
         if (DEBUGSESS) NSLog(@"%@ end publish", self);
-
+        
         if (self.synchronPubMid == mid) {
             return TRUE;
         } else {
@@ -744,7 +744,7 @@
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:.1]];
     }
     if (DEBUGSESS) NSLog(@"%@ end close", self);
-
+    
 }
 
 - (void)closeInternal
@@ -765,7 +765,7 @@
     [self.decoder close];
     self.encoder.delegate = nil;
     self.decoder.delegate = nil;
-
+    
     self.status = MQTTSessionStatusClosed;
     if ([self.delegate respondsToSelector:@selector(handleEvent:event:error:)]) {
         [self.delegate handleEvent:self event:MQTTSessionEventConnectionClosed error:nil];
@@ -773,7 +773,7 @@
     if ([self.delegate respondsToSelector:@selector(connectionClosed:)]) {
         [self.delegate connectionClosed:self];
     }
-
+    
     if ([self.delegate respondsToSelector:@selector(buffered:queued:flowingIn:flowingOut:)]) {
         [self.delegate buffered:self
                          queued:[self.queue count]
@@ -838,17 +838,17 @@
             switch (self.status) {
                 case MQTTSessionStatusCreated:
                     if (!self.connectMessage) {
-                    [sender encodeMessage:[MQTTMessage connectMessageWithClientId:self.clientId
-                                                                         userName:self.userName
-                                                                         password:self.password
-                                                                        keepAlive:self.keepAliveInterval
-                                                                     cleanSession:self.cleanSessionFlag
-                                                                             will:self.willFlag
-                                                                        willTopic:self.willTopic
-                                                                          willMsg:self.willMsg
-                                                                          willQoS:self.willQoS
-                                                                       willRetain:self.willRetainFlag
-                                                                    protocolLevel:self.protocolLevel]];
+                        [sender encodeMessage:[MQTTMessage connectMessageWithClientId:self.clientId
+                                                                             userName:self.userName
+                                                                             password:self.password
+                                                                            keepAlive:self.keepAliveInterval
+                                                                         cleanSession:self.cleanSessionFlag
+                                                                                 will:self.willFlag
+                                                                            willTopic:self.willTopic
+                                                                              willMsg:self.willMsg
+                                                                              willQoS:self.willQoS
+                                                                           willRetain:self.willRetainFlag
+                                                                        protocolLevel:self.protocolLevel]];
                     } else {
                         [sender encodeMessage:self.connectMessage];
                     }
@@ -976,11 +976,11 @@
                             if ([self.delegate respondsToSelector:@selector(connected:sessionPresent:)]) {
                                 [self.delegate connected:self sessionPresent:((bytes[0] & 0x01) == 0x01)];
                             }
-
+                            
                             if(self.connectionHandler){
                                 self.connectionHandler(MQTTSessionEventConnected);
                             }
-
+                            
                             self.synchronConnect = FALSE;
                             
                             if ([self.queue count] > 0) {
@@ -1027,7 +1027,7 @@
                             if ([self.delegate respondsToSelector:@selector(connectionRefused:error:)]) {
                                 [self.delegate connectionRefused:self error:error];
                             }
-
+                            
                         }
                     }
                     break;
@@ -1111,10 +1111,10 @@
                     return;
                 } else {
                     NSDictionary *dict = @{@"data": data,
-                                          @"topic": topic,
-                                          @"qos": @(msg.qos),
-                                          @"retained": @(msg.retainFlag),
-                                          @"mid": @(msgId)};
+                                           @"topic": topic,
+                                           @"qos": @(msg.qos),
+                                           @"retained": @(msg.retainFlag),
+                                           @"mid": @(msgId)};
                     (self.rxFlows)[[NSNumber numberWithUnsignedInt:msgId]] = dict;
                     if ([self.delegate respondsToSelector:@selector(buffered:queued:flowingIn:flowingOut:)]) {
                         [self.delegate buffered:self
@@ -1235,7 +1235,7 @@
                 if(self.messageHandler){
                     self.messageHandler([dict valueForKey:@"data"], [dict valueForKey:@"topic"]);
                 }
-
+                
                 [self.rxFlows removeObjectForKey:msgId];
                 if ([self.delegate respondsToSelector:@selector(buffered:queued:flowingIn:flowingOut:)]) {
                     [self.delegate buffered:self
@@ -1296,11 +1296,11 @@
     if ([self.delegate respondsToSelector:@selector(handleEvent:event:error:)]) {
         [self.delegate handleEvent:self event:eventCode error:error];
     }
-
+    
     if(self.connectionHandler){
         self.connectionHandler(eventCode);
     }
-
+    
     self.synchronPub = FALSE;
     self.synchronPubMid = 0;
     self.synchronSub = FALSE;

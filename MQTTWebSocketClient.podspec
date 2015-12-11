@@ -11,4 +11,5 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.libraries    = "icucore"
   s.ios.deployment_target = "7.0"
+  #s.dependency 'SocketRocket', '~> 0.4.2'
 end
